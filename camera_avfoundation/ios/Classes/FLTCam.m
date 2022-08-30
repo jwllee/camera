@@ -1071,6 +1071,26 @@ NSString *const errorMethod = @"error";
     [self.captureDevice unlockForConfiguration];
   }
 
+  // hardcoding frame rate to be the maximum
+  var maxMinFrameRate = 0;
+  var maxMaxFrameRate = 0;
+  do {
+    let supportedFrameRange = activeFormat.videoSupportedFrameRateRanges;
+    for range in supportedFrameRange {
+      if (range.minFrameRate >= Double(maxMinFrameRate)) {
+        maxMaxFrameRate = range.maxFrameRate;
+        maxMinFrameRate = range.minFrameRate;
+      }
+    }
+   [self.captureDevice lockForConfiguration:nil];
+   [self.captureDevice activeVideoMaxFrameDuration:CMTimeMake(value: 1, timescale: Int32(maxMaxFrameRate))];
+   [self.captureDevice activeVideoMinFrameDuration:CMTimeMake(value: 1, timescale: Int32(maxMinFrameRate))];
+   [self.captureDevice unlockForConfiguration];
+  } catch {
+    print(@"lockForConfiguration error: %@", error.localizedDescription)
+  }
+
+
   [_videoWriter addInput:_videoWriterInput];
 
   [_captureVideoOutput setSampleBufferDelegate:self queue:_captureSessionQueue];
