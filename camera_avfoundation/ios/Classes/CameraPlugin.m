@@ -158,6 +158,7 @@
     if ([@"initialize" isEqualToString:call.method]) {
       NSString *videoFormatValue = ((NSString *)argsMap[@"imageFormatGroup"]);
       [_camera setVideoFormat:FLTGetVideoFormatFromString(videoFormatValue)];
+      [_camera setCaptureDeviceActiveFormat];
 
       __weak CameraPlugin *weakSelf = self;
       _camera.onFrameAvailable = ^{

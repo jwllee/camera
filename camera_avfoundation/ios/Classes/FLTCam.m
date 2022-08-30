@@ -1071,31 +1071,42 @@ NSString *const errorMethod = @"error";
     [self.captureDevice unlockForConfiguration];
   }
 
-  // hardcoding frame rate to be the maximum
-  var maxMinFrameRate = 0;
-  var maxMaxFrameRate = 0;
-  do {
-    let supportedFrameRange = activeFormat.videoSupportedFrameRateRanges;
-    for range in supportedFrameRange {
-      if (range.minFrameRate >= Double(maxMinFrameRate)) {
-        maxMaxFrameRate = range.maxFrameRate;
-        maxMinFrameRate = range.minFrameRate;
-      }
-    }
-   [self.captureDevice lockForConfiguration:nil];
-   [self.captureDevice activeVideoMaxFrameDuration:CMTimeMake(value: 1, timescale: Int32(maxMaxFrameRate))];
-   [self.captureDevice activeVideoMinFrameDuration:CMTimeMake(value: 1, timescale: Int32(maxMinFrameRate))];
-   [self.captureDevice unlockForConfiguration];
-  } catch {
-    print(@"lockForConfiguration error: %@", error.localizedDescription)
-  }
-
-
   [_videoWriter addInput:_videoWriterInput];
 
   [_captureVideoOutput setSampleBufferDelegate:self queue:_captureSessionQueue];
 
   return YES;
+}
+
+- (void)setCaptureDeviceActiveFormat {
+  AVCaptureDeviceFormat* curActiveFormat = self.captureDevice.activeFormat;
+  CMVideoDimensions curActiveFormatDims = CMVideoFormatDescriptionGetDimensions(curActiveFormat.formatDescription);
+  FourCharCode curActiveFormatMediaSubType = CMFormatDescriptionGetMediaSubType(curActiveFormat.formatDescription);
+  NSLog(@"Default active format: %@", curActiveFormat.description);
+  double maxFrameRate = curActiveFormat.videoSupportedFrameRateRanges.firstObject.maxFrameRate;
+  int maxIndex = -1;
+  for (int i = 0; i < self.captureDevice.formats.count; i++) {
+    AVCaptureDeviceFormat* format = self.captureDevice.formats[i];
+    CMVideoDimensions formatDims = CMVideoFormatDescriptionGetDimensions(format.formatDescription);
+    if (formatDims.width != curActiveFormatDims.width || formatDims.height != curActiveFormatDims.height) {
+      continue;
+    }
+    FourCharCode formatMediaSubType = CMFormatDescriptionGetMediaSubType(format.formatDescription);
+    if (formatMediaSubType != curActiveFormatMediaSubType) {
+      continue;
+    }
+    double formatMaxFrameRate = format.videoSupportedFrameRateRanges.firstObject.maxFrameRate;
+    if (formatMaxFrameRate > maxFrameRate) {
+      maxIndex = i;
+      maxFrameRate = formatMaxFrameRate;
+    }
+  }
+  if (maxIndex >= 0) {
+    [self.captureDevice lockForConfiguration:nil];
+    self.captureDevice.activeFormat = self.captureDevice.formats[maxIndex];
+    [self.captureDevice unlockForConfiguration];
+  }
+  NSLog(@"Final active format: %@", self.captureDevice.activeFormat.description);
 }
 
 - (void)setUpCaptureSessionForAudio {
