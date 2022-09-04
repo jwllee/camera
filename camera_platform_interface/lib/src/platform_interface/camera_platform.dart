@@ -247,6 +247,14 @@ abstract class CameraPlatform extends PlatformInterface {
     throw UnimplementedError('setZoomLevel() is not implemented.');
   }
 
+  Future<double> getMinFrameRate(int cameraId) {
+    throw UnimplementedError('getMinFrameRate() is not implemented.');
+  }
+
+  Future<double> getMaxFrameRate(int cameraId) {
+    throw UnimplementedError('getMaxFrameRate() is not implemented.');
+  }
+
   /// Pause the active preview on the current frame for the selected camera.
   Future<void> pausePreview(int cameraId) {
     throw UnimplementedError('pausePreview() is not implemented.');

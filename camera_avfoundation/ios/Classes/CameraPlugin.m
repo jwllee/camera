@@ -233,6 +233,10 @@
       [result sendSuccessWithData:@(_camera.captureDevice.minExposureTargetBias)];
     } else if ([@"getMaxExposureOffset" isEqualToString:call.method]) {
       [result sendSuccessWithData:@(_camera.captureDevice.maxExposureTargetBias)];
+    } else if ([@"getMinFrameRate" isEqualToString:call.method]) {
+      [result sendSuccessWithData:@((double)_camera.captureDevice.activeVideoMinFrameDuration.timescale)];
+    } else if ([@"getMaxFrameRate" isEqualToString:call.method]) {
+      [result sendSuccessWithData:@((double)_camera.captureDevice.activeVideoMaxFrameDuration.timescale)];
     } else if ([@"getExposureOffsetStepSize" isEqualToString:call.method]) {
       [result sendSuccessWithData:@(0.0)];
     } else if ([@"setExposureOffset" isEqualToString:call.method]) {

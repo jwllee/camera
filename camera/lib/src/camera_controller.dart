@@ -738,6 +738,24 @@ class CameraController extends ValueNotifier<CameraValue> {
     }
   }
 
+  Future<double> getMinFrameRate() {
+    _throwIfNotInitialized('getMinFrameRate');
+    try {
+      return CameraPlatform.instance.getMinFrameRate(_cameraId);
+    } on PlatformException catch (e) {
+      throw CameraException(e.code, e.message);
+    }
+  }
+
+  Future<double> getMaxFrameRate() {
+    _throwIfNotInitialized('getMaxFrameRate');
+    try {
+      return CameraPlatform.instance.getMaxFrameRate(_cameraId);
+    } on PlatformException catch (e) {
+      throw CameraException(e.code, e.message);
+    }
+  }
+
   /// Locks the capture orientation.
   ///
   /// If [orientation] is omitted, the current device orientation is used.
