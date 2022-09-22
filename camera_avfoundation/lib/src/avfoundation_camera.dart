@@ -473,6 +473,26 @@ class AVFoundationCamera extends CameraPlatform {
   }
 
   @override
+  Future<double> getMaxFrameRate(int cameraId) async {
+    final double? maxFrameRate = await _channel.invokeMethod<double>(
+      'getMaxFrameRate',
+      <String, dynamic>{'cameraId': cameraId},
+    );
+
+    return maxFrameRate!;
+  }
+
+  @override
+  Future<double> getMinFrameRate(int cameraId) async {
+    final double? minFrameRate = await _channel.invokeMethod<double>(
+      'getMinFrameRate',
+      <String, dynamic>{'cameraId': cameraId},
+    );
+
+    return minFrameRate!;
+  }
+
+  @override
   Future<void> pausePreview(int cameraId) async {
     await _channel.invokeMethod<double>(
       'pausePreview',

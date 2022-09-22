@@ -1078,6 +1078,40 @@ NSString *const errorMethod = @"error";
   return YES;
 }
 
+- (void)setCaptureDeviceActiveFormat {
+  AVCaptureDeviceFormat* curActiveFormat = self.captureDevice.activeFormat;
+  CMVideoDimensions curActiveFormatDims = CMVideoFormatDescriptionGetDimensions(curActiveFormat.formatDescription);
+  FourCharCode curActiveFormatMediaSubType = CMFormatDescriptionGetMediaSubType(curActiveFormat.formatDescription);
+  NSLog(@"Default active format: %@", curActiveFormat.description);
+  double maxFrameRate = curActiveFormat.videoSupportedFrameRateRanges.firstObject.maxFrameRate;
+  int maxIndex = -1;
+  for (int i = 0; i < self.captureDevice.formats.count; i++) {
+    AVCaptureDeviceFormat* format = self.captureDevice.formats[i];
+    CMVideoDimensions formatDims = CMVideoFormatDescriptionGetDimensions(format.formatDescription);
+    if (formatDims.width != curActiveFormatDims.width || formatDims.height != curActiveFormatDims.height) {
+      continue;
+    }
+    FourCharCode formatMediaSubType = CMFormatDescriptionGetMediaSubType(format.formatDescription);
+    if (formatMediaSubType != curActiveFormatMediaSubType) {
+      continue;
+    }
+    if (!format.isVideoStabilizationSupported) {
+      continue;
+    }
+    double formatMaxFrameRate = format.videoSupportedFrameRateRanges.firstObject.maxFrameRate;
+    if (formatMaxFrameRate > maxFrameRate) {
+      maxIndex = i;
+      maxFrameRate = formatMaxFrameRate;
+    }
+  }
+  if (maxIndex >= 0) {
+    [self.captureDevice lockForConfiguration:nil];
+    self.captureDevice.activeFormat = self.captureDevice.formats[maxIndex];
+    [self.captureDevice unlockForConfiguration];
+  }
+  NSLog(@"Final active format: %@", self.captureDevice.activeFormat.description);
+}
+
 - (void)setUpCaptureSessionForAudio {
   NSError *error = nil;
   // Create a device input with the device and add it to the session.
